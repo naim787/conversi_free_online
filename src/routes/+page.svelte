@@ -6,17 +6,36 @@
     import "../app.css";
   
     let fileInfo = null;
-  
-    function handleFile(event) {
-      const file = event.target.files[0];
-      if (file) {
-        fileInfo = {
-          name: file.name,
-          size: file.size,
-          type: file.type
-        };
-      }
+  let file = null; // <-- Tambahkan ini
+
+  function handleFile(event) {
+    file = event.target.files[0]; // <-- Simpan file-nya di variabel global
+    if (file) {
+      fileInfo = {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      };
     }
+  }
+
+  async function uploadFile() {
+    const formData = new FormData();
+    formData.append("nmfile", file); // <-- sekarang file tidak undefined
+
+    const res = await fetch(" http://127.0.0.1:3000/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cnv-${file.name}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
   </script>
   
   <Nav />
@@ -54,9 +73,9 @@
             </div>
   
             <div class="w-full flex justify-center items-center">
-              <div class="w-[300px] h-[50px] bg-green-300 rounded-xl flex mt-10">
+              <button on:click={uploadFile} class="w-[300px] h-[50px] bg-green-300 rounded-xl flex mt-10">
                 <h1 class="m-auto font-bold text-black">CONVERT</h1>
-              </div>
+              </button>
             </div>
           </div>
         {:else}
